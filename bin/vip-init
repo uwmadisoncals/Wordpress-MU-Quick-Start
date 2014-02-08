@@ -73,46 +73,19 @@ if [ -z "$QUICKSTART_DOMAIN" ]; then
 fi
 
 
-# =====================================
-# Automatically update the repo
-# =====================================
-echo "=================================="
-echo "= Updating VIP Quickstart"
-echo "=================================="
 
-git pull
-git submodule sync
-git submodule update --init --recursive
-echo ""
 
 # =====================================
-# Checkout the VIP shared plugins repo
+# Add vip.dev entry to hosts file
 # =====================================
-for i in {1..3}; do
-    unset response
+if [[ -n '$QUICKSTART_DOMAIN' && false == $SERVER ]]; then
+    echo "=================================="
+    echo "= Configuring the hosts file"
+    echo "=================================="
 
-    echo -n "Enter your WordPress.com username: "
-    read username
-    echo -n "Enter your WordPress.com password: "
-    read -s password
-    response=$(curl -u $username:$password --write-out %{http_code} --silent --output /dev/null -I https://vip-svn.wordpress.com/plugins/)
-
-    if [[ 401 -eq $response ]]; then
-        echo "Login failed. Try again."
-    else
-        break
-    fi
-done
-
-if [[ 401 -eq $response ]]; then
+    cat /etc/hosts | grep $QUICKSTART_DOMAIN || sudo printf "\n# VIP Quickstart\n10.86.73.80 $QUICKSTART_DOMAIN\n" | sudo tee -a /etc/hosts
     echo ""
-    echo "Login Failed. Max Attempts."
-    echo "---------------------------"
-    echo "Looks like you might not have access to our VIP Shared Plugins repo. Just send an email to vip-support@wordpress.com and let us know what project you're working on and we'll set things up for you!"
 fi
-
-echo ""
-echo ""
 
 
 # =====================================
@@ -146,17 +119,7 @@ if [[ true == $SERVER ]]; then
 fi
 
 
-# =====================================
-# Add vip.dev entry to hosts file
-# =====================================
-if [[ -n '$QUICKSTART_DOMAIN' && false == $SERVER ]]; then
-    echo "=================================="
-    echo "= Configuring the hosts file"
-    echo "=================================="
 
-    cat /etc/hosts | grep $QUICKSTART_DOMAIN || sudo printf "\n# VIP Quickstart\n10.86.73.80 $QUICKSTART_DOMAIN\n" | sudo tee -a /etc/hosts
-    echo ""
-fi
 
 
 # =====================================
@@ -168,6 +131,12 @@ echo "=================================="
 
 echo "* Go to http://$QUICKSTART_DOMAIN in your browser"
 echo ""
+
+
+#URL=QUICKSTART_DOMAIN
+#[[ -x $BROWSER ]] && exec "$BROWSER" "$URL"
+#path=$(which xdg-open || which gnome-open) && exec "$path" "$URL"
+#echo "Can't find browser"
 
 
 # =====================================
